@@ -338,3 +338,32 @@ post '/create_location' do
   content_type :json
   return location.to_json
 end
+
+# Endpoint to create a customer (already included in the previous step)
+post '/create-customer' do
+  content_type :json
+
+  begin
+    customer = Stripe::Customer.create(
+      name: params[:name],
+      email: params[:email]
+    )
+    { customer_id: customer.id }.to_json
+  rescue Stripe::StripeError => e
+    status 400
+    { error: e.message }.to_json
+  end
+end
+
+# Endpoint to retrieve all customers
+get '/customers' do
+  content_type :json
+
+  begin
+    customers = Stripe::Customer.list(limit: 100) # Adjust the limit as needed
+    { customers: customers.data }.to_json
+  rescue Stripe::StripeError => e
+    status 400
+    { error: e.message }.to_json
+  end
+end
